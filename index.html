@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Second Brain</title>
+<meta name="description" content="My personal dashboard for concepts I learn, work updates, ideas and the AI chats behind them.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231c1b19'/><circle cx='16' cy='16' r='6' fill='none' stroke='%23f2a057' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee;--panel:#fff;--panel-2:#faf9f6;--ink:#1c1b19;--ink-2:#4a4945;--muted:#8a8780;
+  --line:#e7e3da;--line-2:#d6d1c4;--hover:#f0ede6;
+  --learn:#4f5bd5;--learn-bg:#eceefc;--work:#0f8a7e;--work-bg:#e1f3f0;--idea:#d9730d;--idea-bg:#fcefe1;
+  --ok:#2f9e44;--warn:#c2410c;--bad:#e03131;--accent:#1c1b19;--accent-ink:#fff;
+  --shadow:0 1px 2px rgba(28,27,25,.05),0 4px 16px rgba(28,27,25,.05);
+  --radius:14px;--sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Instrument Serif",ui-serif,Georgia,serif;
+  color-scheme:light;
+}
+[data-theme=dark]{
+  --bg:#141413;--panel:#1d1d1b;--panel-2:#222220;--ink:#ecebe7;--ink-2:#bdbbb4;--muted:#85837c;
+  --line:#2d2c29;--line-2:#3b3a36;--hover:#262624;
+  --learn:#939cf7;--learn-bg:#252846;--work:#4cc2b3;--work-bg:#15302c;--idea:#f2a057;--idea-bg:#38281a;
+  --ok:#69db7c;--warn:#ff922b;--bad:#ff6b6b;--accent:#ecebe7;--accent-ink:#141413;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* layout */
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;padding:22px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:18px;background:var(--bg)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;padding:0 8px;font-size:15px}
+.brand .logo{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.brand .logo i{width:11px;height:11px;border-radius:50%;border:2.5px solid var(--idea)}
+nav{display:flex;flex-direction:column;gap:2px}
+nav a{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;text-decoration:none;color:var(--ink-2);font-weight:500}
+nav a:hover{background:var(--hover);color:var(--ink)}
+nav a.on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+nav a .s{display:none}
+nav a .n{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+nav a.on .i{color:var(--c,var(--ink))}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.side-foot small{color:var(--muted);padding:0 8px;font-size:12px}
+main{min-width:0;padding:0 34px 80px}
+.top{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;padding:16px 0;background:linear-gradient(var(--bg) 75%,transparent)}
+.search{position:relative;flex:1;max-width:560px}
+.search .i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--line);border-radius:11px;background:var(--panel);outline:none}
+.search input:focus{border-color:var(--line-2);box-shadow:0 0 0 4px var(--hover)}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%)}
+kbd{font-family:var(--sans);font-size:11px;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--muted);background:var(--panel-2)}
+.results{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);max-height:60vh;overflow:auto;padding:6px}
+.results .empty{padding:14px;color:var(--muted)}
+.res{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:8px;cursor:pointer}
+.res:hover,.res.sel{background:var(--hover)}
+.res b{font-weight:600;display:block}
+.res small{color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px}
+mark{background:var(--idea-bg);color:inherit;border-radius:3px;padding:0 1px}
+
+/* type */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:14px 0 20px;flex-wrap:wrap}
+h1{font-family:var(--serif);font-weight:400;font-size:42px;line-height:1.05;letter-spacing:-.01em;margin:0}
+h1 em{font-style:italic;color:var(--muted)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:620px}
+h2{font-size:15px;font-weight:600;margin:0;letter-spacing:-.005em}
+.muted{color:var(--muted)}
+.section{margin-top:28px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px}
+.section-head .muted{font-size:13px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:500;white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:var(--line-2);background:var(--panel-2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{opacity:.9}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--hover)}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:5px 9px;font-size:13px;border-radius:8px}
+.btn.block{width:100%;justify-content:center}
+.icon-btn{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{background:var(--hover);color:var(--ink)}
+
+/* chips & pills */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:13px;font-weight:500;color:var(--ink-2)}
+.chip:hover{border-color:var(--line-2)}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip .n{opacity:.6;margin-left:4px;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:2px 9px 2px 8px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dot,var(--muted))}
+.pill.plain::before{display:none}
+.pill.t-concept{background:var(--learn-bg);color:var(--learn);border-color:transparent}
+.pill.t-work{background:var(--work-bg);color:var(--work);border-color:transparent}
+.pill.t-idea{background:var(--idea-bg);color:var(--idea);border-color:transparent}
+.pill.t-concept::before,.pill.t-work::before,.pill.t-idea::before{background:currentColor}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:6px;color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);white-space:nowrap}
+.tag{font-size:12px;color:var(--muted)}
+.tdot{width:9px;height:9px;border-radius:3px;flex:none}
+.tdot.t-concept{background:var(--learn)}.tdot.t-work{background:var(--work)}.tdot.t-idea{background:var(--idea)}
+
+/* panels & cards */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.pad{padding:18px}
+.grid{display:grid;gap:14px}
+.cards{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:9px;transition:border-color .15s,transform .15s,box-shadow .15s;position:relative;text-align:left}
+.card:hover{border-color:var(--line-2);box-shadow:var(--shadow);transform:translateY(-1px)}
+.card h3{margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.card .glance{margin:0;color:var(--ink-2);font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.card .ai{font-size:13px;color:var(--ink-2);background:var(--panel-2);border-left:2px solid var(--line-2);padding:6px 9px;border-radius:0 6px 6px 0}
+.card .ai span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-top,.card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-foot{margin-top:auto;padding-top:4px;font-size:12px}
+.card .pin{position:absolute;top:12px;right:12px;color:var(--idea)}
+.card.c-concept{border-top:3px solid var(--learn)}
+.card.c-idea{border-top:3px solid var(--idea)}
+.conf{display:inline-flex;gap:3px}
+.conf i{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.conf i.on{background:var(--learn)}
+.empty-state{padding:40px 20px;text-align:center;color:var(--muted);border:1.5px dashed var(--line-2);border-radius:var(--radius)}
+.empty-state b{display:block;color:var(--ink);font-weight:600;margin-bottom:4px}
+
+/* dashboard */
+.dash-top{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}
+.capture{padding:16px;display:flex;flex-direction:column;gap:10px}
+.capture textarea{width:100%;min-height:92px;border:0;outline:none;resize:vertical;background:transparent;font-size:15px;line-height:1.5}
+.capture .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px}
+.capture input{flex:1;min-width:160px;border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:var(--panel-2);outline:none}
+.seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:5px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:14px 15px;display:flex;flex-direction:column;gap:3px;text-decoration:none}
+.stat:hover{border-color:var(--line-2)}
+.stat .k{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.stat .v{font-family:var(--serif);font-size:34px;line-height:1.1}
+.stat .s{font-size:12.5px;color:var(--ink-2)}
+.meter{height:5px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:5px}
+.meter i{display:block;height:100%;background:var(--learn);border-radius:9px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.two>*,.dash-top>*{min-width:0}
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:11px;padding:10px 14px;border-top:1px solid var(--line);cursor:pointer;min-width:0}
+.row:first-child{border-top:0}
+.row:hover{background:var(--panel-2)}
+.row-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.row-meta{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.list .empty{padding:18px 14px;color:var(--muted);font-size:13.5px}
+.banner{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:var(--idea-bg);color:var(--ink);margin-bottom:14px;font-size:13.5px;flex-wrap:wrap}
+.banner span{flex:1;min-width:200px}
+
+/* toolbar */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.toolbar .grow{flex:1}
+.input,.select{border:1px solid var(--line);border-radius:10px;padding:7px 11px;background:var(--panel);outline:none;min-width:0}
+.input:focus,.select:focus{border-color:var(--line-2)}
+
+/* work timeline */
+.projects{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px}
+.proj{flex:none;padding:10px 13px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer;text-align:left;min-width:150px}
+.proj:hover{border-color:var(--line-2)}
+.proj.on{border-color:var(--work);box-shadow:0 0 0 3px var(--work-bg)}
+.proj b{display:block;font-weight:600;font-size:13.5px}
+.proj small{color:var(--muted);font-size:12px}
+.proj.cold small{color:var(--warn)}
+.day{display:grid;grid-template-columns:120px 1fr;gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+.day:first-child{border-top:0}
+.day-h b{display:block;font-weight:600}
+.day-h small{color:var(--muted)}
+.entries{display:flex;flex-direction:column;gap:8px}
+.entry{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);cursor:pointer;border-left:3px solid var(--dot,var(--work))}
+.entry:hover{border-color:var(--line-2);border-left-color:var(--dot,var(--work))}
+.entry .body{flex:1;min-width:0}
+.entry .head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.entry b{font-weight:600}
+.entry p{margin:3px 0 0;color:var(--ink-2);font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.entry .next{font-size:13px;color:var(--work);margin-top:4px}
+
+/* ideas board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(196px,1fr);gap:12px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.col{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;display:flex;flex-direction:column;gap:9px;min-height:120px}
+.col-h{display:flex;align-items:center;gap:8px;padding:4px 4px 2px;font-weight:600;font-size:13.5px}
+.col-h .n{color:var(--muted);font-weight:500}
+.col-h::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dot)}
+.col .card{padding:13px;gap:7px;border-top:1px solid var(--line)}
+.col .card:hover{border-color:var(--line-2)}
+.col .card h3{font-size:14.5px}
+.col .card .glance{font-size:13px;-webkit-line-clamp:3}
+.adv{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:3px;border-radius:6px;display:grid;place-items:center}
+.adv:hover{background:var(--hover);color:var(--ink)}
+.stale-note{font-size:12px;color:var(--warn);white-space:nowrap}
+.card-foot .chips{min-width:0}
+
+/* sources */
+.src-table{width:100%;border-collapse:collapse}
+.src-table td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+.src-table tr:first-child td{border-top:0}
+.src-table tr:hover td{background:var(--panel-2)}
+.src-main a{font-weight:500;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.src-main a:hover{text-decoration:underline}
+.src-main small{display:block;color:var(--muted);font-size:12px;word-break:break-all;max-width:520px}
+.src-item{cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13.5px}
+.src-item:hover span{text-decoration:underline}
+.nolink{color:var(--muted);font-style:italic;font-size:12.5px}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(20,20,18,.42);backdrop-filter:blur(3px);display:flex;justify-content:center;align-items:flex-start;padding:5vh 16px;overflow-y:auto}
+.sheet{width:100%;max-width:680px;background:var(--panel);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:22px 24px;animation:pop .16s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.99)}}
+.sheet-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sheet-head .icon-btn{margin-left:auto}
+.sheet h2.title{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.15;margin:0 0 12px}
+.glance-box{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px}
+.glance-box .lbl,.blk .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:5px;display:block}
+.blk{margin-top:18px}
+.meta-line{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.md{font-size:14.5px;color:var(--ink)}
+.md p{margin:0 0 8px}
+.md ul{margin:0 0 8px;padding-left:20px}
+.md li{margin:2px 0}
+.md h4{margin:12px 0 4px;font-size:14.5px}
+.md code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--panel-2);border:1px solid var(--line);padding:1px 5px;border-radius:5px}
+.md pre{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;overflow-x:auto}
+.md pre code{border:0;padding:0;background:none}
+.md a{color:var(--learn)}
+.ai-box{border-left:3px solid var(--idea);padding:8px 0 8px 14px}
+.srcs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.srcs li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.srcs li div{min-width:0}
+.srcs a{font-weight:500;text-decoration:none}
+.srcs a:hover{text-decoration:underline}
+.srcs small{display:block;color:var(--muted);font-size:12px;word-break:break-all}
+.sheet-foot{display:flex;gap:8px;align-items:center;margin-top:22px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.sheet-foot .muted{font-size:12.5px;margin-right:auto}
+
+/* form */
+.f{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.f>span{font-size:13px;font-weight:600;color:var(--ink-2)}
+.f>span small{font-weight:400;color:var(--muted)}
+.f input,.f select,.f textarea{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--panel-2);outline:none;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--line-2);background:var(--panel)}
+.f textarea{min-height:90px;resize:vertical;line-height:1.5}
+.f .title-in{font-size:18px;font-weight:600}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.links-ed{display:flex;flex-direction:column;gap:8px}
+.link-row{display:grid;grid-template-columns:130px 1.3fr 1fr 32px;gap:6px;align-items:center}
+.link-row select,.link-row input{border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:var(--panel-2);outline:none;min-width:0;width:100%;font-size:13.5px}
+.range{display:flex;align-items:center;gap:10px}
+.range input{flex:1;accent-color:var(--learn);padding:0;border:0;background:none}
+.hint{font-size:12.5px;color:var(--muted);margin:-6px 0 14px}
+
+/* settings */
+.set-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.set-grid .panel h2{margin-bottom:6px}
+.set-grid .panel p{margin:0 0 12px;color:var(--ink-2);font-size:13.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+ol.steps{margin:0;padding-left:18px;color:var(--ink-2);font-size:13.5px}
+ol.steps li{margin:4px 0}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:11px;box-shadow:var(--shadow);z-index:60;font-weight:500;font-size:14px}
+
+/* responsive */
+@media (max-width:1050px){.dash-top,.two{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;bottom:0;top:auto;left:0;right:0;height:auto;z-index:40;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);background:var(--panel)}
+  .brand,.side-foot{display:none}
+  nav{flex-direction:row;flex:1;justify-content:space-around}
+  nav a{flex-direction:column;gap:2px;font-size:10.5px;padding:6px 4px;flex:1;align-items:center}
+  nav a .n,nav a .l{display:none}
+  nav a .s{display:inline}
+  .row .pill{display:none}
+  nav a.on{box-shadow:none;background:var(--hover)}
+  main{padding:0 14px 100px}
+  h1{font-size:32px}
+  .search kbd{display:none}
+  .day{grid-template-columns:1fr;gap:8px}
+  .frow{grid-template-columns:1fr}
+  .link-row{grid-template-columns:1fr 32px;}
+  .link-row select{grid-column:1}
+  .link-row input{grid-column:1}
+  .link-row .icon-btn{grid-column:2;grid-row:1}
+  .sheet{padding:18px}
+  .src-table td:nth-child(4){display:none}
+  .top .btn span{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="logo"><i></i></span>Second Brain</div>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <button class="btn primary block" data-action="new"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Capture</button>
+      <small>Press <kbd>N</kbd> to capture, <kbd>/</kbd> to search</small>
+    </div>
+  </aside>
+  <main>
+    <header class="top">
+      <div class="search">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search concepts, ideas, work, links, AI chats…" autocomplete="off" aria-label="Search everything">
+        <kbd>/</kbd>
+        <div id="results" class="results" hidden></div>
+      </div>
+      <button class="btn" data-action="new"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>New</span></button>
+    </header>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="modal" class="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast" class="toast" hidden></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<script>
+"use strict";
+/* ============ config ============ */
+const KEY = 'secondbrain.v1';
+const DAY = 864e5;
+const TYPES = {
+  concept: { label: 'Concept', plural: 'Learning', route: 'learning', color: 'var(--learn)',
+    statuses: [['learning', 'Learning'], ['revisit', 'Need to revisit'], ['understood', 'Understood']] },
+  work: { label: 'Work update', plural: 'Work log', route: 'work', color: 'var(--work)',
+    statuses: [['in-progress', 'In progress'], ['blocked', 'Blocked'], ['done', 'Done']] },
+  idea: { label: 'Idea / Project', plural: 'Ideas', route: 'ideas', color: 'var(--idea)',
+    statuses: [['spark', 'Spark'], ['exploring', 'Exploring'], ['building', 'Building'], ['paused', 'Paused'], ['shipped', 'Shipped']] }
+};
+const STATUS_COLOR = {
+  learning: 'var(--learn)', revisit: 'var(--warn)', understood: 'var(--ok)',
+  'in-progress': 'var(--work)', blocked: 'var(--bad)', done: 'var(--ok)',
+  spark: '#f59f00', exploring: 'var(--learn)', building: 'var(--work)', paused: 'var(--muted)', shipped: 'var(--ok)'
+};
+const VIA = {
+  'Claude': '#d97757', 'ChatGPT': '#10a37f', 'Gemini': '#4285f4', 'Perplexity': '#20808d',
+  'Copilot': '#7f5af0', 'Grok': '#6b6b6b', 'DeepSeek': '#4d6bfe', 'Other AI': '#9c36b5',
+  'Article': '#868e96', 'Video': '#e03131', 'Docs': '#1971c2', 'GitHub': '#495057', 'Book': '#a87132', 'Course': '#2b8a3e', 'Other': '#868e96'
+};
+const AI = ['Claude', 'ChatGPT', 'Gemini', 'Perplexity', 'Copilot', 'Grok', 'DeepSeek', 'Other AI'];
+const DETECT = [
+  [/claude\.ai/i, 'Claude'], [/chatgpt\.com|chat\.openai\.com/i, 'ChatGPT'],
+  [/gemini\.google\.com|bard\.google\.com|aistudio\.google\.com|g\.co\/gemini/i, 'Gemini'],
+  [/perplexity\.ai/i, 'Perplexity'], [/copilot\.microsoft\.com|bing\.com\/chat/i, 'Copilot'],
+  [/grok\.com|x\.com\/i\/grok/i, 'Grok'], [/deepseek\.com/i, 'DeepSeek'],
+  [/poe\.com|chat\.mistral\.ai|meta\.ai|huggingface\.co\/chat/i, 'Other AI'],
+  [/youtube\.com|youtu\.be|vimeo\.com|loom\.com/i, 'Video'], [/github\.com|gist\.github/i, 'GitHub'],
+  [/udemy\.com|coursera\.org|edx\.org|khanacademy\.org/i, 'Course'],
+  [/docs\.|developer\.|readthedocs|mdn|devdocs/i, 'Docs']
+];
+const ICONS = {
+  home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  book: '<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/>',
+  brief: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  bulb: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>', ext: '<path d="M14 4h6v6M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
+  pin: '<path d="M12 17v5"/><path d="M9 3h6l-1 5 4 4v2H6v-2l4-4z"/>', edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', up: '<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>'
+};
+const ico = (n, s) => `<svg class="i" viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${ICONS[n] || ''}</svg>`;
+const TYPE_ICON = { concept: 'book', work: 'brief', idea: 'bulb' };
+
+/* ============ helpers ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const todayStr = (offset = 0) => { const d = new Date(Date.now() + offset * DAY); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const statusLabel = (type, s) => (TYPES[type].statuses.find(x => x[0] === s) || [s, s])[1];
+const pill = (type, s) => `<span class="pill" style="--dot:${STATUS_COLOR[s] || 'var(--muted)'}">${esc(statusLabel(type, s))}</span>`;
+const typePill = t => `<span class="pill t-${t}">${TYPES[t].label}</span>`;
+function ago(ts) {
+  const s = (Date.now() - ts) / 1000;
+  if (s < 60) return 'just now';
+  const m = s / 60; if (m < 60) return Math.floor(m) + 'm ago';
+  const h = m / 60; if (h < 24) return Math.floor(h) + 'h ago';
+  const d = h / 24; if (d < 7) return Math.floor(d) + 'd ago';
+  if (d < 60) return Math.floor(d / 7) + 'w ago';
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+const daysSince = ts => Math.floor((Date.now() - ts) / DAY);
+function plain(s) { return String(s || '').replace(/```[\s\S]*?```/g, ' ').replace(/^\s*([-*]|#+)\s+/gm, '').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim(); }
+function fixUrl(u) { u = (u || '').trim(); if (!u) return ''; if (/^https?:\/\//i.test(u)) return u; if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return ''; return /\./.test(u) ? 'https://' + u : ''; }
+const safeHref = u => /^https?:\/\//i.test(u || '') ? esc(u) : '';
+function host(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } }
+function linkInfo(l) {
+  let name = l.via && l.via !== 'auto' ? l.via : '';
+  if (!name && l.url) { for (const [re, n] of DETECT) if (re.test(l.url)) { name = n; break; } }
+  if (!name) name = l.url ? 'Article' : 'Other';
+  return { name, color: VIA[name] || '#868e96', ai: AI.includes(name) };
+}
+const badge = l => { const p = linkInfo(l); return `<span class="badge" style="--c:${p.color}">${AI.includes(p.name) ? ico('chat', 11) : ''}${esc(p.name)}</span>`; };
+function badges(it, max = 3) {
+  const seen = new Map();
+  (it.links || []).forEach(l => { const p = linkInfo(l); if (!seen.has(p.name)) seen.set(p.name, l); });
+  const arr = [...seen.values()];
+  return arr.slice(0, max).map(badge).join('') + (arr.length > max ? `<span class="tag">+${arr.length - max}</span>` : '');
+}
+function md(src) {
+  if (!src) return '';
+  const blocks = [];
+  let s = String(src).replace(/```([\s\S]*?)```/g, (m, c) => { blocks.push(c.replace(/^\w*\n/, '').replace(/^\n/, '')); return `\u0000${blocks.length - 1}\u0000`; });
+  s = esc(s);
+  const inline = t => t
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  const out = []; let list = null, para = [];
+  const flushP = () => { if (para.length) { out.push('<p>' + para.map(inline).join('<br>') + '</p>'); para = []; } };
+  const flushL = () => { if (list) { out.push('<ul>' + list.map(x => '<li>' + inline(x) + '</li>').join('') + '</ul>'); list = null; } };
+  for (const line of s.split('\n')) {
+    const code = line.match(/^\u0000(\d+)\u0000$/);
+    if (code) { flushP(); flushL(); out.push('<pre><code>' + esc(blocks[+code[1]]) + '</code></pre>'); continue; }
+    const b = line.match(/^\s*[-*•]\s+(.*)$/);
+    const h = line.match(/^#{1,4}\s+(.*)$/);
+    if (b) { flushP(); (list = list || []).push(b[1]); }
+    else if (h) { flushP(); flushL(); out.push('<h4>' + inline(h[1]) + '</h4>'); }
+    else if (!line.trim()) { flushP(); flushL(); }
+    else { flushL(); para.push(line); }
+  }
+  flushP(); flushL();
+  return out.join('').replace(/\u0000(\d+)\u0000/g, (m, i) => '<code>' + esc(blocks[+i]) + '</code>');
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 2200); }
+
+/* ============ data ============ */
+let db = null;
+const blank = () => ({ version: 1, items: [], settings: { theme: 'auto', staleDays: 14 }, meta: { lastExport: 0 } });
+function normalize(j) {
+  const b = blank();
+  const d = Object.assign(b, j || {});
+  d.settings = Object.assign(blank().settings, (j && j.settings) || {});
+  d.meta = Object.assign(blank().meta, (j && j.meta) || {});
+  d.items = (Array.isArray(d.items) ? d.items : []).filter(i => i && TYPES[i.type]).map(i => ({
+    id: i.id || uid(), type: i.type, title: i.title || 'Untitled', summary: i.summary || '', notes: i.notes || '',
+    aiThought: i.aiThought || '', next: i.next || '', project: i.project || '', date: i.date || '',
+    status: TYPES[i.type].statuses.some(s => s[0] === i.status) ? i.status : TYPES[i.type].statuses[0][0],
+    confidence: +i.confidence || 0, tags: Array.isArray(i.tags) ? i.tags : [],
+    links: Array.isArray(i.links) ? i.links.map(l => ({ url: l.url || '', label: l.label || '', via: l.via || 'auto' })) : [],
+    pinned: !!i.pinned, created: +i.created || Date.now(), updated: +i.updated || +i.created || Date.now()
+  }));
+  return d;
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast('Could not save — browser storage is full or blocked'); } }
+const byId = id => db.items.find(i => i.id === id);
+const ofType = t => db.items.filter(i => i.type === t);
+const sortItems = arr => [...arr].sort((a, b) => (b.pinned - a.pinned) || (b.updated - a.updated));
+const allTags = () => [...new Set(db.items.flatMap(i => i.tags))].sort();
+const allProjects = () => [...new Set(ofType('work').map(i => i.project).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+const isStale = i => ((i.type === 'idea' && i.status !== 'shipped') || (i.type === 'concept' && i.status !== 'understood')) && daysSince(i.updated) >= db.settings.staleDays;
+
+function seed() {
+  const now = Date.now();
+  const mk = (o, daysAgo) => ({ id: uid() + Math.random().toString(36).slice(2, 4), tags: ['example'], links: [], summary: '', notes: '', aiThought: '', next: '', project: '', date: '', confidence: 0, pinned: false, created: now - daysAgo * DAY, updated: now - daysAgo * DAY, ...o });
+  return [
+    mk({ type: 'concept', title: 'Vector embeddings', status: 'understood', confidence: 4, pinned: true,
+      summary: 'Turning text into a list of numbers so that things with similar meaning end up close together. It\'s what powers semantic search and RAG.',
+      notes: '- Each piece of text → a vector (e.g. 1536 numbers)\n- "Close" is usually measured with **cosine similarity**\n- Store them in a vector DB, then search by meaning instead of keywords\n\nExample: "cheap flights" and "budget airfare" land near each other.',
+      aiThought: 'Claude explained it as a map where meaning = location. Good analogy: words are cities, similar words are neighbours.',
+      tags: ['example', 'ai', 'ml'],
+      links: [{ url: 'https://en.wikipedia.org/wiki/Word_embedding', label: 'Wikipedia: Word embedding', via: 'auto' }, { url: '', label: 'Asked Claude to explain with everyday examples', via: 'Claude' }] }, 3),
+    mk({ type: 'concept', title: 'Git rebase vs merge', status: 'revisit', confidence: 2,
+      summary: 'Merge keeps history as it happened (adds a merge commit). Rebase rewrites my commits on top of main so history is a straight line.',
+      notes: '- Never rebase commits others already pulled\n- `git pull --rebase` keeps my local work on top\n- Use merge for shared branches, rebase for my own feature branch',
+      aiThought: 'ChatGPT said: rebase = "pretend I started from the latest main". Still confused about interactive rebase.',
+      tags: ['example', 'git'],
+      links: [{ url: 'https://git-scm.com/book/en/v2/Git-Branching-Rebasing', label: 'Pro Git book — Rebasing', via: 'auto' }, { url: '', label: 'ChatGPT chat "rebase vs merge" (phone app)', via: 'ChatGPT' }] }, 19),
+    mk({ type: 'work', title: 'Published this site on GitHub Pages', project: 'Second Brain', date: todayStr(), status: 'done',
+      notes: 'Created a repo, uploaded index.html, turned on Pages from the main branch.', next: 'Export data.json weekly as a backup', tags: ['example'] }, 0),
+    mk({ type: 'work', title: 'Fixed login redirect loop', project: 'Client dashboard', date: todayStr(-1), status: 'in-progress',
+      notes: 'Cookie was set on the wrong path so the session was never found after redirect.', next: 'Add a test for the redirect flow', tags: ['example', 'bug'],
+      links: [{ url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies', label: 'MDN: Cookies', via: 'auto' }] }, 1),
+    mk({ type: 'work', title: 'Waiting on API keys from client', project: 'Client dashboard', date: todayStr(-2), status: 'blocked', next: 'Follow up Thursday', tags: ['example'] }, 2),
+    mk({ type: 'idea', title: 'AI study buddy that quizzes me from my notes', status: 'exploring',
+      summary: 'Feed my saved concepts into an AI and get a short daily quiz, so I actually remember what I learn.',
+      aiThought: 'Gemini suggested spaced repetition (review after 1, 3, 7, 21 days) and pointed out Anki already does the scheduling part.',
+      next: 'Try exporting concepts to Anki first', tags: ['example', 'ai', 'side-project'],
+      links: [{ url: '', label: 'Gemini brainstorm on spaced repetition', via: 'Gemini' }, { url: 'https://en.wikipedia.org/wiki/Spaced_repetition', label: 'Spaced repetition', via: 'auto' }] }, 22),
+    mk({ type: 'idea', title: 'Habit tracker for my team', status: 'spark', summary: 'Tiny shared board where everyone ticks off one daily goal.', tags: ['example'] }, 5),
+    mk({ type: 'idea', title: 'Personal finance dashboard', status: 'building', summary: 'Pull my bank CSVs into one page with monthly charts.', next: 'Write the CSV parser', tags: ['example', 'side-project'],
+      links: [{ url: '', label: 'Perplexity search: best free charting libs', via: 'Perplexity' }] }, 4)
+  ];
+}
+
+/* ============ ui state ============ */
+const ui = {
+  capType: 'idea',
+  learning: { status: 'all', tag: '', q: '' },
+  work: { project: '', status: 'all', q: '' },
+  ideas: { tag: '', q: '' },
+  sources: { group: 'all', q: '' },
+  hideBackup: false
+};
+let editing = null; // {id, type}
+let modalMode = null;
+
+/* ============ routing ============ */
+const NAV = [
+  ['dashboard', 'Dashboard', 'home', null, 'Home'],
+  ['learning', 'Learning', 'book', 'concept', 'Learn'],
+  ['work', 'Work log', 'brief', 'work', 'Work'],
+  ['ideas', 'Ideas & projects', 'bulb', 'idea', 'Ideas'],
+  ['sources', 'Sources & chats', 'link', 'links', 'Sources'],
+  ['settings', 'Settings', 'gear', null, 'Settings']
+];
+const ROUTES = { dashboard: viewDashboard, learning: viewLearning, work: viewWork, ideas: viewIdeas, sources: viewSources, settings: viewSettings };
+const current = () => { const h = location.hash.slice(1); return ROUTES[h] ? h : 'dashboard'; };
+function renderNav() {
+  const r = current();
+  const count = k => k === 'links' ? db.items.reduce((n, i) => n + i.links.length, 0) : k ? ofType(k).length : '';
+  const colors = { concept: 'var(--learn)', work: 'var(--work)', idea: 'var(--idea)' };
+  $('#nav').innerHTML = NAV.map(([id, label, icon, k, short]) =>
+    `<a href="#${id}" class="${id === r ? 'on' : ''}" style="--c:${colors[k] || 'var(--ink)'}">${ico(icon)}<span class="l">${label}</span><span class="s">${short}</span>${k ? `<span class="n">${count(k)}</span>` : ''}</a>`).join('');
+}
+function render() {
+  const a = document.activeElement, id = a && a.id, pos = a && a.selectionStart;
+  renderNav();
+  $('#view').innerHTML = ROUTES[current()]();
+  if (id && id !== 'q') { const el = document.getElementById(id); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) { } } }
+}
+window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+
+/* ============ shared fragments ============ */
+const match = (it, q) => {
+  if (!q) return true; q = q.toLowerCase();
+  return [it.title, it.summary, it.notes, it.aiThought, it.next, it.project, it.tags.join(' '), it.links.map(l => l.url + ' ' + l.label + ' ' + linkInfo(l).name).join(' ')].join(' ').toLowerCase().includes(q);
+};
+const conf = n => `<span class="conf" title="Confidence ${n}/5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
+const tagsHtml = tags => tags.length ? `<div class="chips">${tags.map(t => `<span class="tag">#${esc(t)}</span>`).join('')}</div>` : '';
+const row = (it, meta, extra = '') => `<div class="row" data-action="open" data-id="${it.id}" tabindex="0"><span class="tdot t-${it.type}"></span><span class="row-title">${esc(it.title)}</span><span class="row-meta">${meta ?? ago(it.updated)}</span>${extra}</div>`;
+const emptyState = (title, text, type) => `<div class="empty-state"><b>${title}</b>${text}${type ? `<div style="margin-top:12px"><button class="btn" data-action="new" data-type="${type}">${ico('plus')}Add ${TYPES[type].label.toLowerCase()}</button></div>` : ''}</div>`;
+
+function conceptCard(it) {
+  return `<article class="card c-concept" data-action="open" data-id="${it.id}" tabindex="0">
+    ${it.pinned ? `<span class="pin">${ico('pin', 15)}</span>` : ''}
+    <div class="card-top">${pill('concept', it.status)}${it.pinned ? '' : conf(it.confidence)}</div>
+    <h3>${esc(it.title)}</h3>
+    ${it.summary ? `<p class="glance">${esc(it.summary)}</p>` : `<p class="glance muted">No summary yet — add a one-line "at a glance" explanation.</p>`}
+    ${tagsHtml(it.tags)}
+    <div class="card-foot"><div class="chips">${badges(it)}</div><span class="muted">${isStale(it) ? `<span class="stale-note">${daysSince(it.updated)}d untouched</span>` : ago(it.updated)}</span></div>
+  </article>`;
+}
+function ideaCard(it) {
+  const st = TYPES.idea.statuses.map(s => s[0]); const i = st.indexOf(it.status);
+  return `<article class="card c-idea" data-action="open" data-id="${it.id}" tabindex="0">
+    <div class="card-top"><h3>${it.pinned ? `<span style="color:var(--idea)">${ico('pin', 13)}</span> ` : ''}${esc(it.title)}</h3>
+    ${i < st.length - 1 ? `<button class="adv" data-action="advance" data-id="${it.id}" title="Move to ${statusLabel('idea', st[i + 1])}">${ico('arrow', 15)}</button>` : ''}</div>
+    ${it.summary ? `<p class="glance">${esc(it.summary)}</p>` : ''}
+    ${it.aiThought ? `<div class="ai"><span>${esc(plain(it.aiThought))}</span></div>` : ''}
+    ${it.next ? `<div class="tag" style="color:var(--ink-2)">→ ${esc(it.next)}</div>` : ''}
+    <div class="card-foot"><div class="chips">${badges(it)}</div><span class="muted">${isStale(it) ? `<span class="stale-note">${daysSince(it.updated)}d untouched</span>` : ago(it.updated)}</span></div>
+  </article>`;
+}
+
+/* ============ views ============ */
+function viewDashboard() {
+  const items = db.items, now = Date.now();
+  const concepts = ofType('concept'), ideas = ofType('idea'), work = ofType('work');
+  const understood = concepts.filter(c => c.status === 'understood').length;
+  const activeIdeas = ideas.filter(i => !['shipped', 'paused'].includes(i.status)).length;
+  const weekStart = todayStr(-6);
+  const workWeek = work.filter(w => (w.date || '') >= weekStart).length;
+  const blocked = work.filter(w => w.status === 'blocked').length;
+  const links = items.flatMap(i => i.links);
+  const aiChats = links.filter(l => linkInfo(l).ai).length;
+  const stale = items.filter(isStale).sort((a, b) => a.updated - b.updated).slice(0, 6);
+  const review = concepts.filter(c => c.status === 'revisit' || (c.status === 'learning' && c.confidence > 0 && c.confidence <= 2)).slice(0, 6);
+  const recent = [...items].sort((a, b) => b.updated - a.updated).slice(0, 7);
+  const pinned = sortItems(items.filter(i => i.pinned));
+  const h = new Date().getHours();
+  const greet = h < 5 ? 'Up late' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  const needBackup = items.length && !ui.hideBackup && (now - (db.meta.lastExport || 0)) > 7 * DAY;
+  const ph = { idea: 'An idea, a project, something you were thinking about…', concept: 'A concept you just learned — first line is the title, the rest is the "at a glance" summary', work: 'What did you work on? First line is the title' };
+  return `
+  <div class="page-head"><div><h1>${greet}. <em>What's on your mind?</em></h1>
+    <p class="sub">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} · ${items.length} things saved in your second brain</p></div></div>
+  ${needBackup ? `<div class="banner">${ico('down')}<span>Your notes live in this browser only. ${db.meta.lastExport ? `Last backup was ${ago(db.meta.lastExport)}.` : 'You haven\'t backed up yet.'} Download a copy so nothing gets lost.</span><button class="btn sm" data-action="export">Download backup</button><button class="btn sm ghost" data-action="hide-backup">Later</button></div>` : ''}
+  <div class="dash-top">
+    <div class="panel capture">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2>Quick capture</h2>
+        <div class="seg">${['idea', 'concept', 'work'].map(t => `<button data-action="captype" data-type="${t}" class="${ui.capType === t ? 'on' : ''}"><span class="tdot t-${t}"></span>${t === 'idea' ? 'Idea' : t === 'concept' ? 'Concept' : 'Work'}</button>`).join('')}</div>
+      </div>
+      <textarea id="cap" placeholder="${ph[ui.capType]}"></textarea>
+      <div class="bar">
+        <input id="capurl" placeholder="Link to the article, video, or AI chat (optional)">
+        <button class="btn" data-action="capture" data-more="1" title="Save and open full editor">Add details</button>
+        <button class="btn primary" data-action="capture" title="Ctrl/⌘ + Enter">Save</button>
+      </div>
+    </div>
+    <div class="stats">
+      <a class="panel stat" href="#learning"><span class="k"><span class="tdot t-concept"></span>Concepts</span><span class="v">${concepts.length}</span><span class="s">${understood} understood</span><div class="meter"><i style="width:${concepts.length ? Math.round(understood / concepts.length * 100) : 0}%"></i></div></a>
+      <a class="panel stat" href="#ideas"><span class="k"><span class="tdot t-idea"></span>Active ideas</span><span class="v">${activeIdeas}</span><span class="s">${ideas.length} total · ${ideas.filter(i => i.status === 'shipped').length} shipped</span></a>
+      <a class="panel stat" href="#work"><span class="k"><span class="tdot t-work"></span>Work this week</span><span class="v">${workWeek}</span><span class="s" style="${blocked ? 'color:var(--bad)' : ''}">${blocked ? blocked + ' blocked' : 'nothing blocked'}</span></a>
+      <a class="panel stat" href="#sources"><span class="k">${ico('link', 13)}Sources saved</span><span class="v">${links.length}</span><span class="s">${aiChats} AI chats</span></a>
+    </div>
+  </div>
+  ${pinned.length ? `<div class="section"><div class="section-head"><h2>Pinned</h2></div><div class="grid cards">${pinned.slice(0, 6).map(i => i.type === 'idea' ? ideaCard(i) : i.type === 'concept' ? conceptCard(i) : `<article class="card" data-action="open" data-id="${i.id}">${typePill('work')}<h3>${esc(i.title)}</h3></article>`).join('')}</div></div>` : ''}
+  <div class="section two">
+    <div><div class="section-head"><h2>Pick these back up</h2><span class="muted">untouched ${db.settings.staleDays}+ days</span></div>
+      <div class="panel list">${stale.length ? stale.map(i => row(i, `${daysSince(i.updated)}d ago`, `<button class="btn sm ghost" data-action="touch" data-id="${i.id}" title="Still on my radar — reset the timer">${ico('eye', 14)}</button>`)).join('') : '<div class="empty">Nothing forgotten. Ideas and concepts you haven\'t opened in a while will show up here.</div>'}</div></div>
+    <div><div class="section-head"><h2>Review queue</h2><span class="muted">concepts to revisit</span></div>
+      <div class="panel list">${review.length ? review.map(i => row(i, conf(i.confidence))).join('') : '<div class="empty">No concepts flagged. Mark a concept "Need to revisit" or give it low confidence to see it here.</div>'}</div></div>
+  </div>
+  <div class="section"><div class="section-head"><h2>Recently touched</h2></div>
+    <div class="panel list">${recent.length ? recent.map(i => row(i, `${typePill(i.type)} &nbsp;${ago(i.updated)}`)).join('') : '<div class="empty">Nothing yet — capture your first thought above.</div>'}</div></div>`;
+}
+
+function viewLearning() {
+  const f = ui.learning; const all = ofType('concept');
+  const tags = [...new Set(all.flatMap(i => i.tags))].sort();
+  const list = sortItems(all.filter(i => (f.status === 'all' || i.status === f.status) && (!f.tag || i.tags.includes(f.tag)) && match(i, f.q)));
+  const cnt = s => all.filter(i => i.status === s).length;
+  return `
+  <div class="page-head"><div><h1>Learning</h1><p class="sub">Concepts in your own words, with where you learned them. The summary on each card is meant to be read in five seconds.</p></div>
+    <button class="btn primary" data-action="new" data-type="concept">${ico('plus')}New concept</button></div>
+  <div class="toolbar">
+    <div class="chips">
+      <button class="chip ${f.status === 'all' ? 'on' : ''}" data-action="set" data-key="learning.status" data-val="all">All<span class="n">${all.length}</span></button>
+      ${TYPES.concept.statuses.map(([k, l]) => `<button class="chip ${f.status === k ? 'on' : ''}" data-action="set" data-key="learning.status" data-val="${k}">${l}<span class="n">${cnt(k)}</span></button>`).join('')}
+    </div>
+    <span class="grow"></span>
+    ${tags.length ? `<select class="select" data-filter="learning.tag" id="lt"><option value="">All tags</option>${tags.map(t => `<option ${f.tag === t ? 'selected' : ''} value="${esc(t)}">#${esc(t)}</option>`).join('')}</select>` : ''}
+    <input class="input" id="lq" data-filter="learning.q" value="${esc(f.q)}" placeholder="Filter concepts…">
+  </div>
+  ${list.length ? `<div class="grid cards">${list.map(conceptCard).join('')}</div>` : all.length ? emptyState('No matches', 'Try a different filter.') : emptyState('No concepts yet', 'Every time you learn something, write it down in a sentence or two and save the link.', 'concept')}`;
+}
+
+function viewWork() {
+  const f = ui.work; const all = ofType('work');
+  const projects = allProjects().map(p => {
+    const ws = all.filter(w => w.project === p);
+    const last = ws.reduce((m, w) => (w.date || '') > m ? w.date : m, '');
+    return { p, n: ws.length, last, open: ws.filter(w => w.status !== 'done').length };
+  }).sort((a, b) => b.last.localeCompare(a.last));
+  const list = all.filter(i => (!f.project || i.project === f.project) && (f.status === 'all' || i.status === f.status) && match(i, f.q))
+    .sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.created - a.created);
+  const groups = {}; list.forEach(w => (groups[w.date || 'No date'] = groups[w.date || 'No date'] || []).push(w));
+  const dayLabel = d => {
+    if (d === 'No date') return ['No date', ''];
+    const t = todayStr(), y = todayStr(-1);
+    const dt = new Date(d + 'T00:00');
+    return [d === t ? 'Today' : d === y ? 'Yesterday' : dt.toLocaleDateString(undefined, { weekday: 'long' }), dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: dt.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })];
+  };
+  const daysAgoStr = d => { if (!d) return ''; const n = Math.round((new Date(todayStr() + 'T00:00') - new Date(d + 'T00:00')) / DAY); return n <= 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; };
+  const cnt = s => all.filter(i => (!f.project || i.project === f.project) && i.status === s).length;
+  return `
+  <div class="page-head"><div><h1>Work log</h1><p class="sub">A running diary of what you did, what's blocked, and what's next, grouped by project so nothing slips.</p></div>
+    <button class="btn primary" data-action="new" data-type="work">${ico('plus')}Log update</button></div>
+  ${projects.length ? `<div class="projects">
+    <button class="proj ${!f.project ? 'on' : ''}" data-action="set" data-key="work.project" data-val=""><b>All projects</b><small>${all.length} updates</small></button>
+    ${projects.map(p => { const cold = p.open && p.last && daysAgoStr(p.last).includes('days') && parseInt(daysAgoStr(p.last)) >= db.settings.staleDays; return `<button class="proj ${f.project === p.p ? 'on' : ''} ${cold ? 'cold' : ''}" data-action="set" data-key="work.project" data-val="${esc(p.p)}"><b>${esc(p.p)}</b><small>${p.n} update${p.n > 1 ? 's' : ''} · last ${daysAgoStr(p.last) || '—'}${p.open ? ` · ${p.open} open` : ''}</small></button>`; }).join('')}
+  </div>` : ''}
+  <div class="toolbar">
+    <div class="chips">
+      <button class="chip ${f.status === 'all' ? 'on' : ''}" data-action="set" data-key="work.status" data-val="all">All</button>
+      ${TYPES.work.statuses.map(([k, l]) => `<button class="chip ${f.status === k ? 'on' : ''}" data-action="set" data-key="work.status" data-val="${k}">${l}<span class="n">${cnt(k)}</span></button>`).join('')}
+    </div><span class="grow"></span>
+    <input class="input" id="wq" data-filter="work.q" value="${esc(f.q)}" placeholder="Filter updates…">
+  </div>
+  ${list.length ? `<div class="panel pad">${Object.entries(groups).map(([d, ws]) => { const [a, b] = dayLabel(d); return `<div class="day"><div class="day-h"><b>${a}</b><small>${b}</small></div><div class="entries">${ws.map(w => `
+    <div class="entry" data-action="open" data-id="${w.id}" tabindex="0" style="--dot:${STATUS_COLOR[w.status]}"><div class="body">
+      <div class="head">${w.project ? `<span class="pill t-work plain">${esc(w.project)}</span>` : ''}<b>${esc(w.title)}</b>${pill('work', w.status)}</div>
+      ${w.notes ? `<p>${esc(plain(w.notes))}</p>` : ''}
+      ${w.next ? `<div class="next">→ Next: ${esc(w.next)}</div>` : ''}
+    </div><div class="chips" style="align-self:flex-start">${badges(w, 2)}</div></div>`).join('')}</div></div>`; }).join('')}</div>`
+    : all.length ? emptyState('No matches', 'Try a different filter.') : emptyState('No work updates yet', 'Log what you worked on today — even one line helps future you.', 'work')}`;
+}
+
+function viewIdeas() {
+  const f = ui.ideas; const all = ofType('idea');
+  const tags = [...new Set(all.flatMap(i => i.tags))].sort();
+  const list = all.filter(i => (!f.tag || i.tags.includes(f.tag)) && match(i, f.q));
+  return `
+  <div class="page-head"><div><h1>Ideas & projects</h1><p class="sub">Every idea you've had, what the AI thought about it, and where that chat happened. Press → on a card to move it forward.</p></div>
+    <button class="btn primary" data-action="new" data-type="idea">${ico('plus')}New idea</button></div>
+  <div class="toolbar"><span class="grow"></span>
+    ${tags.length ? `<select class="select" data-filter="ideas.tag" id="it"><option value="">All tags</option>${tags.map(t => `<option ${f.tag === t ? 'selected' : ''} value="${esc(t)}">#${esc(t)}</option>`).join('')}</select>` : ''}
+    <input class="input" id="iq" data-filter="ideas.q" value="${esc(f.q)}" placeholder="Filter ideas…">
+  </div>
+  ${all.length ? `<div class="board">${TYPES.idea.statuses.map(([k, l]) => { const col = sortItems(list.filter(i => i.status === k)); return `
+    <div class="col" style="--dot:${STATUS_COLOR[k]}"><div class="col-h">${l}<span class="n">${col.length}</span>
+      <button class="icon-btn" style="margin-left:auto;width:26px;height:26px" data-action="new" data-type="idea" data-status="${k}" title="Add to ${l}">${ico('plus', 15)}</button></div>
+      ${col.map(ideaCard).join('')}</div>`; }).join('')}</div>`
+    : emptyState('No ideas yet', 'Dump every idea here — half-baked is fine. Add the AI chat link so you can find that conversation again.', 'idea')}`;
+}
+
+function viewSources() {
+  const f = ui.sources;
+  const rows = [];
+  db.items.forEach(it => it.links.forEach(l => rows.push({ l, it, p: linkInfo(l) })));
+  rows.sort((a, b) => b.it.updated - a.it.updated);
+  const groups = {}; rows.forEach(r => groups[r.p.name] = (groups[r.p.name] || 0) + 1);
+  const aiCount = rows.filter(r => r.p.ai).length;
+  const q = f.q.toLowerCase();
+  const shown = rows.filter(r => (f.group === 'all' || (f.group === 'ai' ? r.p.ai : r.p.name === f.group)) &&
+    (!q || (r.l.url + ' ' + r.l.label + ' ' + r.it.title + ' ' + r.p.name).toLowerCase().includes(q)));
+  const order = Object.keys(groups).sort((a, b) => (AI.includes(b) - AI.includes(a)) || groups[b] - groups[a]);
+  return `
+  <div class="page-head"><div><h1>Sources & chats</h1><p class="sub">Every article, video and AI conversation you've saved, in one place. Use it when you know you read or chatted about something but can't remember where.</p></div></div>
+  <div class="toolbar">
+    <div class="chips">
+      <button class="chip ${f.group === 'all' ? 'on' : ''}" data-action="set" data-key="sources.group" data-val="all">All<span class="n">${rows.length}</span></button>
+      ${aiCount ? `<button class="chip ${f.group === 'ai' ? 'on' : ''}" data-action="set" data-key="sources.group" data-val="ai">All AI chats<span class="n">${aiCount}</span></button>` : ''}
+      ${order.map(g => `<button class="chip ${f.group === g ? 'on' : ''}" data-action="set" data-key="sources.group" data-val="${esc(g)}"><span class="tdot" style="background:${VIA[g] || '#868e96'};display:inline-block;margin-right:6px;width:7px;height:7px;border-radius:50%"></span>${esc(g)}<span class="n">${groups[g]}</span></button>`).join('')}
+    </div><span class="grow"></span>
+    <input class="input" id="sq" data-filter="sources.q" value="${esc(f.q)}" placeholder="Filter links…">
+  </div>
+  ${shown.length ? `<div class="panel"><table class="src-table"><tbody>${shown.map(({ l, it }) => {
+    const href = safeHref(l.url);
+    return `<tr><td style="width:1%">${badge(l)}</td>
+      <td class="src-main">${href ? `<a href="${href}" target="_blank" rel="noopener">${esc(l.label || host(l.url) || l.url)} ${ico('ext', 13)}</a><small>${esc(l.url)}</small>` : `<span style="font-weight:500">${esc(l.label || 'Untitled')}</span><small class="nolink">no link saved</small>`}</td>
+      <td><div class="src-item" data-action="open" data-id="${it.id}"><span class="tdot t-${it.type}"></span><span>${esc(it.title)}</span></div></td>
+      <td class="muted" style="white-space:nowrap;font-size:12.5px">${ago(it.updated)}</td></tr>`;
+  }).join('')}</tbody></table></div>` : rows.length ? emptyState('No matches', 'Try another filter.') : emptyState('No sources yet', 'When you add a concept, idea or work update, attach the article URL or the AI chat link. They all collect here.')}`;
+}
+
+function viewSettings() {
+  const s = db.settings;
+  const ex = db.items.filter(i => i.tags.includes('example')).length;
+  return `
+  <div class="page-head"><div><h1>Settings</h1><p class="sub">Your data is saved in this browser. Back it up and sync it with the data file.</p></div></div>
+  <div class="set-grid">
+    <div class="panel pad"><h2>Appearance</h2><p>Pick a theme.</p>
+      <div class="seg">${['auto', 'light', 'dark'].map(t => `<button data-action="theme" data-val="${t}" class="${s.theme === t ? 'on' : ''}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div>
+    </div>
+    <div class="panel pad"><h2>Forgotten-item reminder</h2><p>Show ideas and concepts on the dashboard when you haven't touched them for this many days.</p>
+      <div class="range"><input type="range" min="3" max="60" value="${s.staleDays}" id="stale" data-setting="staleDays"><b id="staleV" style="min-width:60px">${s.staleDays} days</b></div>
+    </div>
+    <div class="panel pad"><h2>Backup & sync</h2><p>Download everything as <code>data.json</code>. Upload that file to your GitHub repo next to <code>index.html</code> and any new browser or device will load it on first visit.</p>
+      <div class="btns">
+        <button class="btn primary" data-action="export">${ico('down', 16)}Download data.json</button>
+        <button class="btn" data-action="import" data-mode="merge">${ico('up', 16)}Import & merge</button>
+        <button class="btn" data-action="import" data-mode="replace">Import & replace</button>
+      </div>
+      <p style="margin:12px 0 0" class="muted">${db.meta.lastExport ? 'Last backup: ' + ago(db.meta.lastExport) : 'Not backed up yet.'}</p>
+    </div>
+    <div class="panel pad"><h2>Load from your site</h2><p>Pull the <code>data.json</code> that's published in your GitHub repo into this browser. Newer items win.</p>
+      <div class="btns"><button class="btn" data-action="loadsite">Load data.json from site</button></div>
+    </div>
+    <div class="panel pad"><h2>Moving to a new device</h2>
+      <ol class="steps"><li>On your current device, go to Settings and click <b>Download data.json</b>.</li><li>Upload the file to your repo (replace the old one).</li><li>On the new device, open your site. It loads the file automatically, or click <b>Load data.json from site</b>.</li></ol>
+      <p style="margin:10px 0 0;color:var(--warn);font-size:13px">If your repo is public, anyone can read <code>data.json</code>. Keep private notes out of it, or use Import on each device instead.</p>
+    </div>
+    <div class="panel pad"><h2>Clean up</h2><p>${ex ? `There are ${ex} example entries tagged #example.` : 'No example entries left.'}</p>
+      <div class="btns">${ex ? `<button class="btn" data-action="clear-examples">Remove examples</button>` : ''}<button class="btn danger" data-action="wipe">${ico('trash', 16)}Erase everything</button></div>
+    </div>
+  </div>`;
+}
+
+/* ============ modal: detail ============ */
+function openModal(html, mode) { modalMode = mode; $('#sheet').innerHTML = html; $('#modal').hidden = false; document.body.style.overflow = 'hidden'; }
+function closeModal() { $('#modal').hidden = true; $('#sheet').innerHTML = ''; document.body.style.overflow = ''; editing = null; modalMode = null; }
+function openDetail(id) {
+  const it = byId(id); if (!it) return;
+  const T = TYPES[it.type];
+  const glanceLbl = it.type === 'concept' ? 'At a glance' : 'The idea';
+  openModal(`
+    <div class="sheet-head">${typePill(it.type)}${pill(it.type, it.status)}${it.pinned ? `<span class="pill plain" style="color:var(--idea)">${ico('pin', 12)} Pinned</span>` : ''}<button class="icon-btn" data-action="close" aria-label="Close">${ico('x')}</button></div>
+    <h2 class="title">${esc(it.title)}</h2>
+    <div class="meta-line">
+      ${it.type === 'work' && it.project ? `<span class="pill t-work plain">${esc(it.project)}</span>` : ''}
+      ${it.type === 'work' && it.date ? `<span class="muted">${new Date(it.date + 'T00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>` : ''}
+      ${it.type === 'concept' ? `<span class="muted" style="display:inline-flex;gap:6px;align-items:center">Confidence ${conf(it.confidence)}</span>` : ''}
+      ${it.tags.map(t => `<span class="tag">#${esc(t)}</span>`).join('')}
+    </div>
+    ${it.summary && it.type !== 'work' ? `<div class="glance-box"><span class="lbl">${glanceLbl}</span>${esc(it.summary)}</div>` : ''}
+    ${it.aiThought ? `<div class="blk"><span class="lbl">What the AI said</span><div class="ai-box md">${md(it.aiThought)}</div></div>` : ''}
+    ${it.notes ? `<div class="blk"><span class="lbl">${it.type === 'work' ? 'What I did' : 'Notes'}</span><div class="md">${md(it.notes)}</div></div>` : ''}
+    ${it.next ? `<div class="blk"><span class="lbl">Next step</span><div>→ ${esc(it.next)}</div></div>` : ''}
+    <div class="blk"><span class="lbl">Sources & chats</span>
+      ${it.links.length ? `<ul class="srcs">${it.links.map(l => { const href = safeHref(l.url); return `<li>${badge(l)}<div>${href ? `<a href="${href}" target="_blank" rel="noopener">${esc(l.label || host(l.url) || l.url)} ${ico('ext', 12)}</a><small>${esc(l.url)}</small>` : `<span>${esc(l.label || 'Untitled')}</span><small class="nolink">no link saved</small>`}</div></li>`; }).join('')}</ul>` : `<div class="muted" style="font-size:13.5px">No links yet. Edit this to add where you read it or the AI chat where you worked it out.</div>`}
+    </div>
+    <div class="sheet-foot">
+      <span class="muted">Created ${ago(it.created)} · updated ${ago(it.updated)}</span>
+      <button class="btn sm ghost danger" data-action="delete" data-id="${it.id}">${ico('trash', 15)}Delete</button>
+      <button class="btn sm" data-action="pin" data-id="${it.id}">${ico('pin', 15)}${it.pinned ? 'Unpin' : 'Pin'}</button>
+      <button class="btn sm primary" data-action="edit" data-id="${it.id}">${ico('edit', 15)}Edit</button>
+    </div>`, 'detail');
+}
+
+/* ============ modal: editor ============ */
+const VIA_OPTS = ['auto', ...Object.keys(VIA)];
+function linkRow(l = { url: '', label: '', via: 'auto' }) {
+  return `<div class="link-row">
+    <select name="via" aria-label="Where">${VIA_OPTS.map(v => `<option value="${v}" ${l.via === v ? 'selected' : ''}>${v === 'auto' ? 'Auto-detect' : v}</option>`).join('')}</select>
+    <input name="url" value="${esc(l.url)}" placeholder="https://… (article, video or AI chat link)">
+    <input name="label" value="${esc(l.label)}" placeholder="What is it? e.g. 'Claude chat on closures'">
+    <button type="button" class="icon-btn" data-action="rmlink" aria-label="Remove link">${ico('x', 16)}</button></div>`;
+}
+function editorHTML(d, isNew) {
+  const T = TYPES[d.type];
+  const ph = {
+    concept: { title: 'e.g. How HTTPS works', summary: 'Explain it to yourself in 1–2 sentences, so you get it at a glance', notes: '- Key points\n- Examples\n- Gotchas\n\nTip: **bold**, `code`, bullet lists and links work here.', ai: 'What did the AI explain or suggest? A useful analogy?' },
+    idea: { title: 'e.g. App that reminds me of forgotten projects', summary: 'What is it, in one or two lines?', notes: 'Details, features, who it\'s for, open questions…', ai: 'What did the AI think? Pros, cons, suggestions, similar products…' },
+    work: { title: 'e.g. Finished the signup page', notes: 'What did you do? Any decisions or problems?' }
+  }[d.type];
+  const projects = allProjects();
+  const tags = allTags();
+  return `<form id="editForm" autocomplete="off" novalidate>
+    <div class="sheet-head">
+      ${isNew ? `<div class="seg">${Object.keys(TYPES).map(t => `<button type="button" data-action="edtype" data-type="${t}" class="${d.type === t ? 'on' : ''}"><span class="tdot t-${t}"></span>${TYPES[t].label}</button>`).join('')}</div>` : typePill(d.type)}
+      <button type="button" class="icon-btn" data-action="close" aria-label="Close">${ico('x')}</button>
+    </div>
+    <label class="f"><span>Title</span><input class="title-in" name="title" value="${esc(d.title)}" placeholder="${esc(ph.title)}"></label>
+    ${d.type === 'work' ? `<div class="frow">
+      <label class="f"><span>Project</span><input name="project" list="projList" value="${esc(d.project)}" placeholder="e.g. Client dashboard"><datalist id="projList">${projects.map(p => `<option value="${esc(p)}">`).join('')}</datalist></label>
+      <label class="f"><span>Date</span><input type="date" name="date" value="${esc(d.date || todayStr())}"></label></div>` : ''}
+    ${d.type !== 'work' ? `<label class="f"><span>${d.type === 'concept' ? 'At a glance' : 'The idea'} <small>· the short version you'll see on the card</small></span><textarea name="summary" rows="2" style="min-height:64px" placeholder="${esc(ph.summary)}">${esc(d.summary)}</textarea></label>` : ''}
+    <div class="frow">
+      <label class="f"><span>Status</span><select name="status">${T.statuses.map(([k, l]) => `<option value="${k}" ${d.status === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      ${d.type === 'concept' ? `<label class="f"><span>How well do I understand it?</span><div class="range"><input type="range" name="confidence" min="0" max="5" value="${d.confidence || 0}" id="confIn"><b id="confV">${d.confidence || 0}/5</b></div></label>`
+      : `<label class="f"><span>Next step</span><input name="next" value="${esc(d.next)}" placeholder="The very next thing to do"></label>`}
+    </div>
+    ${d.type !== 'work' ? `<label class="f"><span>What the AI said <small>· key takeaway from the chat</small></span><textarea name="aiThought" rows="3" placeholder="${esc(ph.ai)}">${esc(d.aiThought)}</textarea></label>` : ''}
+    <label class="f"><span>${d.type === 'work' ? 'What I did' : 'Notes'}</span><textarea name="notes" rows="5" placeholder="${esc(ph.notes)}">${esc(d.notes)}</textarea></label>
+    ${d.type === 'concept' ? `<label class="f"><span>Next step <small>· optional</small></span><input name="next" value="${esc(d.next)}" placeholder="e.g. Build a tiny example"></label>` : ''}
+    <div class="f"><span>Sources & AI chats <small>· where you read it, watched it, or talked it through</small></span>
+      <div class="links-ed" id="linksEd">${(d.links.length ? d.links : [undefined]).map(l => linkRow(l)).join('')}</div>
+      <div><button type="button" class="btn sm ghost" data-action="addlink">${ico('plus', 15)}Add another link</button></div>
+    </div>
+    <p class="hint">Can't share the chat link? Pick the AI (Claude, ChatGPT, Gemini…) and just describe it, e.g. "ChatGPT on my phone, chat named 'SQL joins'".</p>
+    <label class="f"><span>Tags <small>· comma separated</small></span><input name="tags" list="tagList" value="${esc(d.tags.join(', '))}" placeholder="e.g. ai, javascript, side-project"><datalist id="tagList">${tags.map(t => `<option value="${esc(t)}">`).join('')}</datalist></label>
+    <div class="sheet-foot">
+      <span class="muted">${isNew ? 'Ctrl/⌘ + Enter to save' : 'Last updated ' + ago(byId(d.id)?.updated || Date.now())}</span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">${isNew ? 'Save' : 'Save changes'}</button>
+    </div>
+  </form>`;
+}
+function blankItem(type, extra = {}) {
+  return { type, title: '', summary: '', notes: '', aiThought: '', next: '', project: type === 'work' ? (ui.work.project || '') : '', date: todayStr(), status: TYPES[type].statuses[0][0], confidence: 0, tags: [], links: [], ...extra };
+}
+function openEditor(id, type, extra) {
+  const it = id ? byId(id) : null;
+  const d = it ? JSON.parse(JSON.stringify(it)) : blankItem(type, extra);
+  editing = { id: it ? it.id : null, type: d.type };
+  openModal(editorHTML(d, !it), 'edit');
+  setTimeout(() => { const t = $('#editForm [name=title]'); if (t && !t.value) t.focus(); }, 30);
+}
+function gather() {
+  const f = $('#editForm'); const g = n => { const el = f.querySelector(`[name="${n}"]`); return el ? el.value : ''; };
+  const d = {
+    type: editing.type, title: g('title').trim(), summary: g('summary').trim(), notes: g('notes'), aiThought: g('aiThought'),
+    next: g('next').trim(), project: g('project').trim(), date: g('date'), status: g('status'), confidence: +g('confidence') || 0,
+    tags: [...new Set(g('tags').split(',').map(s => s.trim().replace(/^#/, '')).filter(Boolean))]
+  };
+  d.links = [...f.querySelectorAll('.link-row')].map(r => {
+    const raw = r.querySelector('[name=url]').value.trim();
+    return { via: r.querySelector('[name=via]').value, url: fixUrl(raw), label: r.querySelector('[name=label]').value.trim() || (raw && !fixUrl(raw) ? raw : '') };
+  }).filter(l => l.url || l.label);
+  return d;
+}
+function saveForm() {
+  const d = gather();
+  if (!d.title) { const t = $('#editForm [name=title]'); t.focus(); t.style.borderColor = 'var(--bad)'; toast('Give it a title first'); return; }
+  const now = Date.now();
+  let id = editing.id;
+  if (id) { Object.assign(byId(id), d, { updated: now }); }
+  else { id = uid(); db.items.unshift({ ...d, id, pinned: false, created: now, updated: now }); }
+  save(); closeModal(); render(); toast('Saved');
+}
+
+/* ============ search ============ */
+let searchSel = 0;
+function search(q) {
+  const box = $('#results'); q = q.trim();
+  if (!q) { box.hidden = true; return; }
+  const ql = q.toLowerCase();
+  const res = db.items.filter(i => match(i, q)).sort((a, b) => (b.title.toLowerCase().includes(ql) - a.title.toLowerCase().includes(ql)) || b.updated - a.updated).slice(0, 12);
+  const hi = s => { const e = esc(s); const r = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + ')', 'ig'); return e.replace(r, '<mark>$1</mark>'); };
+  const snip = i => {
+    const fields = [i.summary, plain(i.aiThought), plain(i.notes), i.links.map(l => linkInfo(l).name + ': ' + (l.label || l.url)).join(' · '), i.project, i.tags.join(' ')];
+    const hit = fields.find(x => x && x.toLowerCase().includes(ql)) || fields.find(Boolean) || '';
+    const k = hit.toLowerCase().indexOf(ql); const start = Math.max(0, k - 40);
+    return (start ? '…' : '') + hit.slice(start, start + 140);
+  };
+  searchSel = 0;
+  box.innerHTML = res.length ? res.map((i, n) => `<div class="res ${n === 0 ? 'sel' : ''}" data-action="open" data-id="${i.id}"><span class="tdot t-${i.type}" style="margin-top:6px"></span><div style="min-width:0"><b>${hi(i.title)}</b><small>${hi(snip(i))}</small></div><span style="margin-left:auto">${typePill(i.type)}</span></div>`).join('')
+    : `<div class="empty">Nothing found for "${esc(q)}". <button class="btn sm" data-action="new" data-title="${esc(q)}">Capture it as an idea</button></div>`;
+  box.hidden = false;
+}
+
+/* ============ actions ============ */
+function setPath(p, v) { const [a, b] = p.split('.'); ui[a][b] = v; }
+function applyTheme() {
+  const t = db.settings.theme;
+  document.documentElement.dataset.theme = t === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
+}
+function guessType() { return { learning: 'concept', work: 'work', ideas: 'idea' }[current()] || 'idea'; }
+function capture(more) {
+  const txt = $('#cap').value.trim(); const url = $('#capurl').value.trim();
+  if (!txt) { $('#cap').focus(); toast('Type something first'); return; }
+  const lines = txt.split('\n'); let title = lines[0].trim(); let rest = lines.slice(1).join('\n').trim();
+  if (title.length > 120) { rest = (title.slice(117) + '\n' + rest).trim(); title = title.slice(0, 117) + '…'; }
+  const t = ui.capType;
+  const d = blankItem(t, { title });
+  if (t === 'work') d.notes = rest; else d.summary = rest;
+  if (url) d.links = [{ url: fixUrl(url), label: fixUrl(url) ? '' : url, via: 'auto' }];
+  const now = Date.now(); const id = uid();
+  db.items.unshift({ ...d, id, pinned: false, created: now, updated: now });
+  save();
+  if (more) { render(); openEditor(id); } else { render(); toast(`${TYPES[t].label} captured`); }
+}
+function download(name, text) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function mergeIn(j) {
+  const inc = normalize(j).items; let added = 0, updated = 0;
+  inc.forEach(i => { const ex = byId(i.id); if (!ex) { db.items.push(i); added++; } else if (i.updated > ex.updated) { Object.assign(ex, i); updated++; } });
+  return { added, updated };
+}
+const actions = {
+  open: t => { $('#results').hidden = true; openDetail(t.dataset.id); },
+  new: t => { $('#results').hidden = true; openEditor(null, t.dataset.type || guessType(), { ...(t.dataset.status ? { status: t.dataset.status } : {}), ...(t.dataset.title ? { title: t.dataset.title } : {}) }); },
+  edit: t => openEditor(t.dataset.id),
+  close: () => closeModal(),
+  delete: t => { const it = byId(t.dataset.id); if (it && confirm(`Delete "${it.title}"? This can't be undone.`)) { db.items = db.items.filter(i => i.id !== it.id); save(); closeModal(); render(); toast('Deleted'); } },
+  pin: t => { const it = byId(t.dataset.id); it.pinned = !it.pinned; save(); render(); openDetail(it.id); },
+  touch: (t, e) => { e.stopPropagation(); const it = byId(t.dataset.id); it.updated = Date.now(); save(); render(); toast('Reminder reset'); },
+  advance: (t, e) => { e.stopPropagation(); const it = byId(t.dataset.id); const st = TYPES.idea.statuses.map(s => s[0]); const i = st.indexOf(it.status); if (i < st.length - 1) { it.status = st[i + 1]; it.updated = Date.now(); save(); render(); toast('Moved to ' + statusLabel('idea', it.status)); } },
+  set: t => { setPath(t.dataset.key, t.dataset.val); render(); },
+  captype: t => { ui.capType = t.dataset.type; const keep = $('#cap').value, u = $('#capurl').value; render(); $('#cap').value = keep; $('#capurl').value = u; $('#cap').focus(); },
+  capture: t => capture(!!t.dataset.more),
+  edtype: t => { const d = gather(); d.type = t.dataset.type; editing.type = d.type; if (!TYPES[d.type].statuses.some(s => s[0] === d.status)) d.status = TYPES[d.type].statuses[0][0]; if (!d.date) d.date = todayStr(); $('#sheet').innerHTML = editorHTML(d, true); },
+  addlink: () => { $('#linksEd').insertAdjacentHTML('beforeend', linkRow()); $('#linksEd .link-row:last-child [name=url]').focus(); },
+  rmlink: t => { const r = t.closest('.link-row'); if ($('#linksEd').children.length > 1) r.remove(); else r.querySelectorAll('input').forEach(i => i.value = ''); },
+  theme: t => { db.settings.theme = t.dataset.val; save(); applyTheme(); render(); },
+  'hide-backup': () => { ui.hideBackup = true; render(); },
+  export: () => { db.meta.lastExport = Date.now(); save(); download('data.json', JSON.stringify(db, null, 2)); toast('Downloaded data.json'); render(); },
+  import: t => { const f = $('#importFile'); f.dataset.mode = t.dataset.mode; f.value = ''; f.click(); },
+  loadsite: async () => {
+    try { const r = await fetch('data.json', { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); const j = await r.json(); const { added, updated } = mergeIn(j); save(); render(); toast(`Loaded: ${added} new, ${updated} updated`); }
+    catch (e) { toast('No data.json found on this site yet'); }
+  },
+  'clear-examples': () => { if (confirm('Remove all entries tagged #example?')) { db.items = db.items.filter(i => !i.tags.includes('example')); save(); render(); toast('Examples removed'); } },
+  wipe: () => { if (confirm('Erase EVERYTHING in this browser? Download a backup first if you want to keep it.') && confirm('Really erase all items? This cannot be undone.')) { db.items = []; save(); render(); toast('All cleared'); } }
+};
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-action]');
+  if (!e.target.closest('.search')) $('#results').hidden = true;
+  if (t && actions[t.dataset.action]) { e.preventDefault(); actions[t.dataset.action](t, e); }
+});
+$('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal' && modalMode === 'detail') closeModal(); });
+document.addEventListener('submit', e => { if (e.target.id === 'editForm') { e.preventDefault(); saveForm(); } });
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'q') return search(t.value);
+  if (t.dataset.filter) { setPath(t.dataset.filter, t.value); render(); }
+  if (t.id === 'confIn') $('#confV').textContent = t.value + '/5';
+  if (t.id === 'stale') { $('#staleV').textContent = t.value + ' days'; }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.setting === 'staleDays') { db.settings.staleDays = +t.value; save(); }
+});
+$('#importFile').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const j = JSON.parse(await file.text());
+    if (!j || !Array.isArray(j.items)) throw new Error('bad');
+    if (e.target.dataset.mode === 'replace') {
+      if (!confirm(`Replace everything here with the ${j.items.length} items in this file?`)) return;
+      const lastExport = db.meta.lastExport; db = normalize(j); db.meta.lastExport = lastExport; toast(`Imported ${db.items.length} items`);
+    } else { const { added, updated } = mergeIn(j); toast(`Merged: ${added} new, ${updated} updated`); }
+    save(); applyTheme(); render();
+  } catch (err) { toast('That file isn\'t a valid backup'); }
+});
+document.addEventListener('keydown', e => {
+  const inField = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if (e.key === 'Escape') { if (!$('#modal').hidden) { closeModal(); return; } $('#results').hidden = true; if (document.activeElement.id === 'q') { $('#q').value = ''; $('#q').blur(); } return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if ($('#editForm')) { e.preventDefault(); saveForm(); return; }
+    if (document.activeElement.id === 'cap' || document.activeElement.id === 'capurl') { e.preventDefault(); capture(false); return; }
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#q').focus(); $('#q').select(); return; }
+  if (document.activeElement.id === 'q') {
+    const rs = [...document.querySelectorAll('#results .res')];
+    if (!rs.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); searchSel = (searchSel + (e.key === 'ArrowDown' ? 1 : -1) + rs.length) % rs.length; rs.forEach((r, i) => r.classList.toggle('sel', i === searchSel)); rs[searchSel].scrollIntoView({ block: 'nearest' }); }
+    if (e.key === 'Enter') { e.preventDefault(); rs[searchSel].click(); $('#q').blur(); }
+    return;
+  }
+  if (inField || e.ctrlKey || e.metaKey || e.altKey || !$('#modal').hidden) return;
+  if (e.key === '/') { e.preventDefault(); $('#q').focus(); }
+  else if (e.key.toLowerCase() === 'n') { e.preventDefault(); openEditor(null, guessType()); }
+  else if (e.key === 'Enter' && document.activeElement.dataset.action) { document.activeElement.click(); }
+});
+$('#q').addEventListener('focus', e => { if (e.target.value.trim()) search(e.target.value); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => db && applyTheme());
+
+/* ============ boot ============ */
+(async function boot() {
+  try { const s = localStorage.getItem(KEY); if (s) db = normalize(JSON.parse(s)); } catch (e) { }
+  let fromFile = false;
+  if (!db) {
+    try { const r = await fetch('data.json', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.items)) { db = normalize(j); fromFile = true; } } } catch (e) { }
+  }
+  if (!db) { db = blank(); db.items = seed(); }
+  save(); applyTheme(); render();
+  if (fromFile) toast(`Loaded ${db.items.length} items from data.json`);
+})();
+</script>
+</body>
+</html>
